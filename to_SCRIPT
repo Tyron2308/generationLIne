@@ -1,0 +1,2 @@
+hdfs dfs -rm -r /coffre_fort/datalake/la_banque_postale/an0/unica/ua_dtlcontacthist/qtg037aa.aflaall
+hdfs dfs -put src/main/ressource/test2.schema /coffre_fort/administration/la_banque_postale/metadata/unica/qtg037aa.aflaall.schema

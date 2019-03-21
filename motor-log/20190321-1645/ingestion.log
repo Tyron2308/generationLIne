@@ -1,0 +1,8 @@
+2019-03-21 16:45:38,913 - INFO - ==================================================
+2019-03-21 16:45:38,913 - INFO - ==== STARTING INGESTION: 21/03/2019 16:45:38 =====
+2019-03-21 16:45:38,914 - INFO - ==================================================
+2019-03-21 16:45:38,972 - INFO - [FetchAndEvaluateSchema] Evaluate schema for file qtg037aa.aflaall.201808021213519
+2019-03-21 16:45:39,202 - FATAL - org.apache.spark.sql.AnalysisException: Path does not exist: file:/coffre_fort/administration/*/metadata/*/qtg037aa.aflaall.schema;
+2019-03-21 16:45:39,202 - INFO - ==================================================
+2019-03-21 16:45:39,202 - INFO - ================ END OF INGESTION ================
+2019-03-21 16:45:39,202 - INFO - ==================================================
