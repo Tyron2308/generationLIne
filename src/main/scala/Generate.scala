@@ -54,13 +54,6 @@ class Generate {
     */
 
   def load(spark: SparkSession, path: String): Array[Field] = {
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD")
-    println("LOOOOOOOOOOOOOOOAD" + path)
     val schema = spark.read.option("multiLine", "true").json(path)
 
     _schama = Some(schema)
@@ -163,7 +156,7 @@ object GenerateRecords {
     * @return true or false if function succeed/fail
     */
   def generateValidRecords(spark: SparkSession, numberOfLine: Int, path:String, schemaToRead: String,
-                           generator: Generate, p:Double = 100.0): Boolean = {
+                           generator: Generate, p:Double): Boolean = {
     import EnumMap._
 
     val fieldLine = generator.load(spark, schemaToRead)
@@ -175,12 +168,12 @@ object GenerateRecords {
     check
   }
 
-  def generateInvalidRecords(spark: SparkSession, numberOfline: Int,  p: Double, path: String,
-                             schemaToRead: String, generator: Generate): Boolean = {
-    generateValidRecords(spark, numberOfline, path, schemaToRead, generator, p)
-  }
-
-
+  /*
+  * args(0) => nombre de ligne par fichier
+  * args(2) => path ou ecrire le fichier sur hdfs
+  * args(1) => pourcentage de ligne valide
+  * args(3) => schema to load
+   */
   def main(args: Array[String]): Unit = {
     require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
     val spark = SparkSession.builder
@@ -190,8 +183,8 @@ object GenerateRecords {
       .getOrCreate
     Logger.getLogger("org").setLevel(Level.ERROR)
     val generator = new Generate()
-    for (i <- 2 until args.length)
-      generateValidRecords(spark, args(0).toInt, args(1), args(i), generator)
+    for (i <- 3 until args.length)
+      generateValidRecords(spark, args(0).toInt, args(2), args(i), generator, args(1).toDouble)
     spark.stop
   }
 }
