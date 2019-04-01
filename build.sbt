@@ -5,32 +5,24 @@ assemblySettings
 
 version := "0.1"
 scalaVersion := "2.11.8"
+name := "generateur_ligne"
 
+/*lazy val commonSettings = Seq(*/
+  /*organization := "com.lbp.ingestion",*/
+  /*version := "0.1.0-SNAPSHOT",*/
+  /*scalaVersion := "2.11.8"*/
+/*)*/
 
-lazy val commonSettings = Seq(
-  organization := "com.lbp.ingestion",
-  version := "0.1.0-SNAPSHOT",
-  scalaVersion := "2.11.8"
-)
+/*lazy val generatorLine = (project in file(".")).settings(*/
+    /*commonSettings,*/
+    /*name := "generateur_ligne",*/
+    /*mainClass in (Compile, run) := Some("GenerateOBJ"),*/
+/*//    libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.0"*/
+    /*//libraryDependencies += "org.apache.spark" %% "spark-hive"       % "2.0.0" % "test"*/
+/*).dependsOn(moteurIngestion)*/
 
-lazy val moteurIngestion = (project in file("Ingestion"))
-    .settings( commonSettings,
-      name := "Ingestion",
-        mainClass in (Compile, run) := Some("com.lbp.ingestion.Main")
-
-    )
-
-
-lazy val generatorLine = (project in file(".")).settings(
-    commonSettings,
-    name := "generateur_ligne",
-    mainClass in (Compile, run) := Some("GenerateOBJ"),
-    libraryDependencies ++= Seq("org.apache.spark" % "spark-core_2.11" % "2.1.0" % "test->compile"  ,
-                                "org.apache.spark" % "spark-sql_2.11" % "2.1.0" )
-//    libraryDependencies += "org.scalatest" % "scalatest_2.11" % "3.0.0"
-    //libraryDependencies += "org.apache.spark" %% "spark-hive"       % "2.0.0" % "test"
-).dependsOn(moteurIngestion)
-
+libraryDependencies ++= Seq("org.apache.spark" % "spark-core_2.11" % "2.1.0",
+                            "org.apache.spark" % "spark-sql_2.11" % "2.1.0" )
 assemblySettings
 
 mergeStrategy in assembly := {

@@ -3,7 +3,6 @@ import org.apache.spark._
 import org.apache.spark.sql._
 import org.apache.log4j._
 import org.apache.hadoop.fs.{FileSystem, Path}
-
 import scala.collection.mutable.ListBuffer
 import scala.util.{Failure, Random, Success, Try}
 
@@ -55,6 +54,13 @@ class Generate {
     */
 
   def load(spark: SparkSession, path: String): Array[Field] = {
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD")
+    println("LOOOOOOOOOOOOOOOAD" + path)
     val schema = spark.read.option("multiLine", "true").json(path)
 
     _schama = Some(schema)
@@ -69,6 +75,7 @@ class Generate {
       val array = elem.split(",")
       Field(Some(array(1)), array(0), array(2).toBoolean, array(3).toBoolean)
     })
+    fieldLigne.foreach(println(_))
     fieldLigne
   }
 
@@ -82,7 +89,7 @@ class Generate {
     * @return
     */
   def createRawString(as: Array[Field], AlterJobs: GeneratorCombinator)
-                     (pGoodAlter: Double, numIteration: Int): Boolean = {
+                     (pGoodAlter: Double, numIteration: Int, pathRaw: String): Boolean = {
     val numIterationEpoch = ((100.0 - pGoodAlter) / 10).toInt
     val rawLineVector = ListBuffer[Option[List[Field]]]()
     while (rawLineVector.length < numIteration - 1) {
@@ -94,20 +101,22 @@ class Generate {
     val lines = rawLineVector.map(_.getOrElse(List()))
                  .map(element => element.map(_.name.getOrElse("")).mkString(","))
                  .toList
-
-    println("toOutput")
-    lines.foreach(println(_))
-    toOutput(lines) match {
+    toOutput(lines, pathRaw) match {
       case Success(check) =>
-        true
+        println(s"value return by toOutput $check")
+        check
       case Failure(failed) =>
+        println(s"value return by toOutput $failed")
         false
     }
+
   }
 
   @throws
-  private def toOutput(l: List[String]): Try[Boolean] = {
+  private def toOutput(l: List[String], pathRaw: String): Try[Boolean] = {
     import java.io._
+    import java.time.format.DateTimeFormatter
+    import java.time.LocalDateTime
 
     val filename = _schama.getOrElse(None) match {
       case dataFrame if dataFrame != None =>
@@ -117,17 +126,15 @@ class Generate {
                                              .getString(0)
       case None => throw new RuntimeException("filename is not valid inside dataFrame")
     }
-    println("open file")
-    val file = new File(Generate.path + filename)
+
     val conf = new Configuration()
     conf.set("fs.defaultFS", Generate.hdfsUser)
     val fs: FileSystem = FileSystem.get(conf)
-    val output = fs.create(new Path(Generate.pathRaw + filename + ".201808021213519"))
+    val timeStamp = DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(LocalDateTime.now)
+    val output = fs.create(new Path(pathRaw + filename + timeStamp))
     val writer = new PrintWriter(output)
-    val bw = new BufferedWriter(new FileWriter(file))
     try {
       l.foreach(element => writer.write(element + "\n"))
-      l.foreach(element => bw.write(element + "\n"))
       Try(true)
     } catch {
       case e: IOException => {
@@ -137,18 +144,13 @@ class Generate {
     }
     finally {
         writer.close()
-        bw.close()
         println(s"file opened $filename, Closed!")
       }
   }
 }
 
 object Generate {
-  final val pathRaw = "/coffre_fort/ingress/copyRawFiles/"
   final val field = "fields"
-  final val path = "src/main/ressource/"
-  final val StringSchema = "src/main/ressource/schema"
-  final val IntSchema = "src/main/ressource/test2.schema"
   final val hdfsUser = "hdfs://192.168.43.16:9000"
 }
 
@@ -160,32 +162,37 @@ object GenerateRecords {
     * @param p % of good line inside the file
     * @return true or false if function succeed/fail
     */
-  def generateValidRecords(numberOfLine: Int, p: Double = 100.0): Boolean = {
+  def generateValidRecords(spark: SparkSession, numberOfLine: Int, path:String, schemaToRead: String,
+                           generator: Generate, p:Double = 100.0): Boolean = {
     import EnumMap._
-    val spark = SparkSession.builder
-      .appName("My Spark Application")
-      .master("local[*]")
-      .config(new SparkConf().setAppName("Line Generator").setMaster("local"))
-      .getOrCreate
-    Logger.getLogger("org").setLevel(Level.ERROR)
-    val generator = new Generate()
-    val fieldLine = generator.load(spark, Generate.IntSchema)
+
+    val fieldLine = generator.load(spark, schemaToRead)
     val check = generator.createRawString(fieldLine, Map(VALID -> new ValidLine,
       WBOOL -> new GenerateWrongBoolean,
       MORECOLUMN -> new GenerateMoreColumns,
-      TYPEFALSE -> new GenerateFalseType))(p, numberOfLine)
+      TYPEFALSE -> new GenerateFalseType))(p, numberOfLine, path)
     println(s"isCreateRawStringDone $check")
-    spark.stop
     check
   }
 
-  def generateInvalidRecords(numberOfline: Int,  p: Double): Boolean = {
-    generateValidRecords(numberOfline, p)
+  def generateInvalidRecords(spark: SparkSession, numberOfline: Int,  p: Double, path: String,
+                             schemaToRead: String, generator: Generate): Boolean = {
+    generateValidRecords(spark, numberOfline, path, schemaToRead, generator, p)
   }
 
 
   def main(args: Array[String]): Unit = {
-        generateValidRecords(100)
+      require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
+      val spark = SparkSession.builder
+        .appName("My Spark Application")
+        .master("local[*]")
+        .config(new SparkConf().setAppName("Line Generator"))
+        .getOrCreate
+      Logger.getLogger("org").setLevel(Level.ERROR)
+      val generator = new Generate()
+      for (i <- 2 to args.length)
+        generateValidRecords(spark, args(0).toInt, args(1), args(i), generator)
+      spark.stop
     }
 }
 
