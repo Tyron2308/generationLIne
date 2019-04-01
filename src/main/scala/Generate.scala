@@ -93,15 +93,15 @@ class Generate {
     val numIterationEpoch = ((100.0 - pGoodAlter) / 10).toInt
     val rawLineVector = ListBuffer[Option[List[Field]]]()
     while (rawLineVector.length < numIteration - 1) {
-        generateString(10 - numIterationEpoch, randomError())(as.toList, AlterJobs, VALID)
-          .map(rawLineVector += _)
-        generateString(numIterationEpoch, randomError())(as.toList, AlterJobs, INVALID)
-          .map(rawLineVector += _)
+      generateString(10 - numIterationEpoch, randomError())(as.toList, AlterJobs, VALID)
+        .map(rawLineVector += _)
+      generateString(numIterationEpoch, randomError())(as.toList, AlterJobs, INVALID)
+        .map(rawLineVector += _)
     }
     val lines = rawLineVector.map(_.getOrElse(List()))
-                 .map(element => element.map(_.name.getOrElse("")).mkString(","))
-                 .toList
-    toOutput(lines, pathRaw) match {
+      .map(element => element.map(_.name.getOrElse("")).mkString(","))
+      .toList
+    toOutput(lines, pathRaw, pGoodAlter) match {
       case Success(check) =>
         println(s"value return by toOutput $check")
         check
@@ -113,7 +113,7 @@ class Generate {
   }
 
   @throws
-  private def toOutput(l: List[String], pathRaw: String): Try[Boolean] = {
+  private def toOutput(l: List[String], pathRaw: String, p: Double): Try[Boolean] = {
     import java.io._
     import java.time.format.DateTimeFormatter
     import java.time.LocalDateTime
@@ -121,17 +121,17 @@ class Generate {
     val filename = _schama.getOrElse(None) match {
       case dataFrame if dataFrame != None =>
         dataFrame.asInstanceOf[sql.DataFrame].select("nameFile")
-                                             .collect()
-                                             .head
-                                             .getString(0)
+          .collect()
+          .head
+          .getString(0)
       case None => throw new RuntimeException("filename is not valid inside dataFrame")
     }
 
     val conf = new Configuration()
-    conf.set("fs.defaultFS", Generate.hdfsUser)
+    // conf.set("fs.defaultFS", Generate.hdfsUser)
     val fs: FileSystem = FileSystem.get(conf)
     val timeStamp = DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(LocalDateTime.now)
-    val output = fs.create(new Path(pathRaw + filename + timeStamp))
+    val output = fs.create(new Path(pathRaw + filename + "." + p.toString +"-" + (100-p).toString + "." + timeStamp))
     val writer = new PrintWriter(output)
     try {
       l.foreach(element => writer.write(element + "\n"))
@@ -143,20 +143,20 @@ class Generate {
       }
     }
     finally {
-        writer.close()
-        println(s"file opened $filename, Closed!")
-      }
+      writer.close()
+      println(s"file opened $filename, Closed!")
+    }
   }
 }
 
 object Generate {
   final val field = "fields"
-  final val hdfsUser = "hdfs://192.168.43.16:9000"
+  // final val hdfsUser = "hdfs://192.168.43.16:9000"
 }
 
 object GenerateRecords {
 
- /**
+  /**
     *
     * @param numberOfLine number of line generate for this batch of line
     * @param p % of good line inside the file
@@ -182,18 +182,17 @@ object GenerateRecords {
 
 
   def main(args: Array[String]): Unit = {
-      require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
-      val spark = SparkSession.builder
-        .appName("My Spark Application")
-        .master("local[*]")
-        .config(new SparkConf().setAppName("Line Generator"))
-        .getOrCreate
-      Logger.getLogger("org").setLevel(Level.ERROR)
-      val generator = new Generate()
-      for (i <- 2 to args.length)
-        generateValidRecords(spark, args(0).toInt, args(1), args(i), generator)
-      spark.stop
-    }
+    require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
+    val spark = SparkSession.builder
+      .appName("My Spark Application")
+      .master("local[*]")
+      .config(new SparkConf().setAppName("Line Generator"))
+      .getOrCreate
+    Logger.getLogger("org").setLevel(Level.ERROR)
+    val generator = new Generate()
+    for (i <- 2 until args.length)
+      generateValidRecords(spark, args(0).toInt, args(1), args(i), generator)
+    spark.stop
+  }
 }
-
 
