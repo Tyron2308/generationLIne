@@ -37,7 +37,7 @@ class Generate {
       for(_ <- 0 until totalIteration)
         yield Some(caller(enum).generateFalseField(as))
     else
-      for(_ <- 0 until totalIteration - 1)
+      for(_ <- 0 until totalIteration)
         yield Some(caller(VALID).generateFalseField(as))
   }
 
@@ -47,7 +47,7 @@ class Generate {
     * qu'on appelle en parametre (call by Name, enum: => retour) de génerateString.
     */
   private def randomError(): EnumMap.Value = {
-    val A = Array.range(1, 3)
+    val A = Array.range(1, 4)
     Random.shuffle(A.toList).head match {
       case 1 =>  WBOOL
       case 2 =>  TYPEFALSE
@@ -104,8 +104,9 @@ class Generate {
       generateString(numIterationEpoch, randomError())(as.toList, AlterJobs, INVALID)
         .map(rawLineVector += _)
     }
+    val delimiter = _schama.get.select("delimiter").first.toSeq.head.toString
     val lines = rawLineVector.map(_.getOrElse(List()))
-      .map(element => element.map(_.name.getOrElse("")).mkString(","))
+      .map(element => element.map(_.name.getOrElse("")).mkString(delimiter))
       .toList
     toOutput(lines, pathRaw, pGoodAlter) match {
       case Success(check) =>

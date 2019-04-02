@@ -15,11 +15,7 @@ object EnumMap extends Enumeration {
 object OBJRandom {
   implicit class RandomField(l: ClassGenerated) {
     def rand = new Random()
-    def printableString = () =>  (for (i <- 0 until 10)
-      yield rand.nextPrintableChar())
-      .mkString("")
-      .filter(_ != '"')
-      .filter(_ != '\\')
+    def printableString = () =>  (for (i <- 0 until 10) yield rand.nextPrintableChar()).mkString("").filter(_ != '"').filter(_ != '\\')
     def new_rand = () => BigDecimal(rand.nextDouble()).setScale(2, BigDecimal.RoundingMode.HALF_UP)
       .toDouble.toString
     def nextInt = rand.nextInt().toString
@@ -57,7 +53,7 @@ class GenerateMoreColumns extends ClassGenerated {
         case "double" =>
           acc ++ List(Field(Some(this.new_rand()), elem.hiveType, elem.nullable, elem.pivot)) ++ falseField
         case "string" =>
-          acc ++ List(Field(Some("\"" + this.printableString()), elem.hiveType, elem.nullable, elem.pivot)) ++ falseField
+          acc ++ List(Field(Some("\"" + this.printableString() + "\""), elem.hiveType, elem.nullable, elem.pivot)) ++ falseField
         case "int" =>
           acc ++ List(Field(Some(this.nextInt), elem.hiveType, elem.nullable, elem.pivot)) ++ falseField
       }
@@ -72,11 +68,11 @@ class GenerateFalseType extends ClassGenerated {
     flow.foldLeft(List[Field]())((acc, elem) => {
       elem.hiveType match {
         case "double" =>
-          acc ++ List(Field(Some("\"" + this.printableString()), elem.hiveType, elem.nullable, elem.pivot))
+          acc ++ List(Field(Some("\"" + this.printableString() + "\""), elem.hiveType, elem.nullable, elem.pivot))
         case "string" =>
           acc ++ List(Field(Some(this.new_rand()), elem.hiveType, elem.nullable, elem.pivot))
         case "int" =>
-          acc ++ List(Field(Some("\"" + this.printableString()), elem.hiveType, elem.nullable, elem.pivot))
+          acc ++ List(Field(Some("\"" + this.printableString() + "\""), elem.hiveType, elem.nullable, elem.pivot))
       }
     })}
 }
@@ -98,7 +94,7 @@ class GenerateWrongBoolean extends ClassGenerated {
           if (this.nextTrueInt % 2 == 0)
             acc ++ List(Field(None, elem.hiveType, elem.nullable, elem.pivot))
           else
-            acc ++ List(Field(Some("\"" + this.printableString()), elem.hiveType, elem.nullable, elem.pivot))
+            acc ++ List(Field(Some("\"" + this.printableString() + "\""), elem.hiveType, elem.nullable, elem.pivot))
       }
     })}
 }

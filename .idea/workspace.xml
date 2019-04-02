@@ -2,8 +2,7 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="65f9d0aa-9bfc-4099-b54a-f035074853fd" name="Default" comment="">
-      <change beforePath="" afterPath="$PROJECT_DIR$/src/ParsingArgument.scala" />
-      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change beforePath="$PROJECT_DIR$/src/ParsingArgument.scala" afterPath="$PROJECT_DIR$/src/ParsingArgument.scala" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/Generate.scala" afterPath="$PROJECT_DIR$/src/main/scala/Generate.scala" />
       <change beforePath="$PROJECT_DIR$/src/main/scala/GeneratorClass.scala" afterPath="$PROJECT_DIR$/src/main/scala/GeneratorClass.scala" />
     </list>
@@ -29,22 +28,12 @@
           <file leaf-file-name="Generate.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/main/scala/Generate.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="1136">
-                  <caret line="215" column="0" lean-forward="false" selection-start-line="215" selection-start-column="0" selection-end-line="215" selection-end-column="0" />
+                <state relative-caret-position="680">
+                  <caret line="200" column="0" lean-forward="true" selection-start-line="200" selection-start-column="0" selection-end-line="200" selection-end-column="0" />
                   <folding>
                     <element signature="e#0#43#0" expanded="true" />
-                    <element signature="e#4775#4791#0" expanded="true" />
+                    <element signature="e#4855#4871#0" expanded="true" />
                   </folding>
-                </state>
-              </provider>
-            </entry>
-          </file>
-          <file leaf-file-name="ParsingArgument.scala" pinned="false" current-in-tab="false">
-            <entry file="file://$PROJECT_DIR$/src/ParsingArgument.scala">
-              <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="51">
-                  <caret line="8" column="4" lean-forward="false" selection-start-line="8" selection-start-column="4" selection-end-line="8" selection-end-column="4" />
-                  <folding />
                 </state>
               </provider>
             </entry>
@@ -52,8 +41,8 @@
           <file leaf-file-name="GeneratorClass.scala" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/src/main/scala/GeneratorClass.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="308">
-                  <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+                <state relative-caret-position="233">
+                  <caret line="17" column="96" lean-forward="false" selection-start-line="17" selection-start-column="88" selection-end-line="17" selection-end-column="96" />
                   <folding>
                     <element signature="e#0#42#0" expanded="true" />
                   </folding>
@@ -68,10 +57,10 @@
           <file leaf-file-name="ParsingArgument.scala" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/src/ParsingArgument.scala">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="701">
-                  <caret line="49" column="0" lean-forward="true" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
+                <state relative-caret-position="0">
+                  <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
                   <folding>
-                    <element signature="e#0#25#0" expanded="true" />
+                    <element signature="e#0#43#0" expanded="true" />
                   </folding>
                 </state>
               </provider>
@@ -80,6 +69,11 @@
         </leaf>
       </split-second>
     </splitter>
+  </component>
+  <component name="FindInProjectRecents">
+    <findStrings>
+      <find>mkstring</find>
+    </findStrings>
   </component>
   <component name="Git.Settings">
     <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
@@ -92,9 +86,9 @@
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
+        <option value="$PROJECT_DIR$/src/ParsingArgument.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/GeneratorClass.scala" />
         <option value="$PROJECT_DIR$/src/main/scala/Generate.scala" />
-        <option value="$PROJECT_DIR$/src/ParsingArgument.scala" />
       </list>
     </option>
   </component>
@@ -433,10 +427,20 @@
     <watches-manager />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/ParsingArgument.scala">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="0">
+          <caret line="0" column="0" lean-forward="false" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
+          <folding>
+            <element signature="e#0#43#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/GeneratorClass.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="308">
-          <caret line="52" column="0" lean-forward="true" selection-start-line="52" selection-start-column="0" selection-end-line="52" selection-end-column="0" />
+        <state relative-caret-position="233">
+          <caret line="17" column="96" lean-forward="false" selection-start-line="17" selection-start-column="88" selection-end-line="17" selection-end-column="96" />
           <folding>
             <element signature="e#0#42#0" expanded="true" />
           </folding>
@@ -445,21 +449,11 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/scala/Generate.scala">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="1136">
-          <caret line="215" column="0" lean-forward="false" selection-start-line="215" selection-start-column="0" selection-end-line="215" selection-end-column="0" />
+        <state relative-caret-position="680">
+          <caret line="200" column="0" lean-forward="true" selection-start-line="200" selection-start-column="0" selection-end-line="200" selection-end-column="0" />
           <folding>
             <element signature="e#0#43#0" expanded="true" />
-            <element signature="e#4775#4791#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/ParsingArgument.scala">
-      <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="701">
-          <caret line="49" column="0" lean-forward="true" selection-start-line="49" selection-start-column="0" selection-end-line="49" selection-end-column="0" />
-          <folding>
-            <element signature="e#0#25#0" expanded="true" />
+            <element signature="e#4855#4871#0" expanded="true" />
           </folding>
         </state>
       </provider>
