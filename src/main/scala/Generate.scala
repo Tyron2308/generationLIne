@@ -10,6 +10,10 @@ import scala.util.{Failure, Random, Success, Try}
 class Generate {
   import EnumMap._
   type GeneratorCombinator = Map[EnumMap.EnumMap, ClassGenerated]
+  /*
+  * on stoque le shéma dans une Option pour une meilleure gestion des erreurs.
+  * On l'utiliser pour récupére les différentes options souhaitées dans le shchéma load.
+  * */
   var _schama: Option[sql.DataFrame] = None
 
   /**
@@ -37,6 +41,11 @@ class Generate {
         yield Some(caller(VALID).generateFalseField(as))
   }
 
+  /**
+    *
+    * pour pouvoir générer des erreurs aléatoire on passse par une méthode privée,
+    * qu'on appelle en parametre (call by Name, enum: => retour) de génerateString.
+    */
   private def randomError(): EnumMap.Value = {
     val A = Array.range(1, 3)
     Random.shuffle(A.toList).head match {
@@ -74,12 +83,16 @@ class Generate {
 
 
   /**
-    * generate raw string
+    * generate raw string creer un batch de ligne valide et invalide en fonction du pourcentage souhaite.
     * @param as List field fetch from schema stored in ressource directory
     * @param AlterJobs Functor who create line
     * @param pGoodAlter pourcentage of good line in this batch
     * @param numIteration number of line wanted in this batch
-    * @return
+    *
+    *
+    *  rawlineVector est une listBuffer qui s'occupe d'append les lignes créer via les classes ClassGenerated.
+    *  On récupere les élements souhaitées dans la liste de Field, puis on s'occupe de transformer cette liste en string sous format CSV
+    *  pour pouvoir stocker celles-ci dans un fichier HDFS.
     */
   def createRawString(as: Array[Field], AlterJobs: GeneratorCombinator)
                      (pGoodAlter: Double, numIteration: Int, pathRaw: String): Boolean = {
@@ -105,6 +118,15 @@ class Generate {
 
   }
 
+  /**
+    *
+    * @param l list de String a écrire dans un fichier.
+    * @param pathRaw path du directory ou ouvrir le fichier
+    * @param p pourcentage de ligne valide
+    *
+    * fonction qui peux throw des erreurs et retourne un Success en cas de réussite. (si l'on souhaite faire de l'asynchrone par la suite) ou bien Failure.
+    *
+    */
   @throws
   private def toOutput(l: List[String], pathRaw: String, p: Double): Try[Boolean] = {
     import java.io._
@@ -121,7 +143,6 @@ class Generate {
     }
 
     val conf = new Configuration()
-    // conf.set("fs.defaultFS", Generate.hdfsUser)
     val fs: FileSystem = FileSystem.get(conf)
     val timeStamp = DateTimeFormatter.ofPattern("yyyyMMddHHmm").format(LocalDateTime.now)
     val output = fs.create(new Path(pathRaw + filename + "." + p.toString +"-" + (100-p).toString + "." + timeStamp))
@@ -168,12 +189,6 @@ object GenerateRecords {
     check
   }
 
-  /*
-  * args(0) => nombre de ligne par fichier
-  * args(2) => path ou ecrire le fichier sur hdfs
-  * args(1) => pourcentage de ligne valide
-  * args(3) => schema to load
-   */
   def main(args: Array[String]): Unit = {
     require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
     val spark = SparkSession.builder
@@ -182,9 +197,19 @@ object GenerateRecords {
       .config(new SparkConf().setAppName("Line Generator"))
       .getOrCreate
     Logger.getLogger("org").setLevel(Level.ERROR)
-    val generator = new Generate()
-    for (i <- 3 until args.length)
-      generateValidRecords(spark, args(0).toInt, args(2), args(i), generator, args(1).toDouble)
+
+    val generator   = new Generate()
+    val numberLine  = ParsingArgument.isNumberLineValid(args(0))
+    val pValidLine  = ParsingArgument.isPValid(ParsingArgument.isNumberLineValid(args(1)).toDouble)
+    val validPath   = ParsingArgument.isPathValid(args(2))
+
+    (numberLine, pValidLine, validPath.getOrElse("")) match {
+      case (-1, _, _) => println(s" numberLine is invalid $numberLine")
+      case (_, _, "") => println(s" path is not valid $validPath")
+      case (lines, p, path) =>
+        for (i <- 3 until args.length)
+        ParsingArgument.isDirectory(args(i), generateValidRecords)(spark, lines, path, generator, p)
+    }
     spark.stop
   }
 }
