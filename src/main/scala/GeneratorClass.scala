@@ -102,7 +102,7 @@ class GenerateWrongBoolean extends ClassGenerated {
 /**
   * Creer une ligne valide
   *
-* */
+  * */
 class ValidLine extends ClassGenerated {
 
   override def generateFalseField(flow: List[Field]): List[Field] = {

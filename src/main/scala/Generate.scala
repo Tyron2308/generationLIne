@@ -3,13 +3,14 @@ import org.apache.spark._
 import org.apache.spark.sql._
 import org.apache.log4j._
 import org.apache.hadoop.fs.{FileSystem, Path}
+
 import scala.collection.mutable.ListBuffer
 import scala.util.{Failure, Random, Success, Try}
 
 
 class Generate {
+  import Generate.GeneratorCombinator
   import EnumMap._
-  type GeneratorCombinator = Map[EnumMap.EnumMap, ClassGenerated]
   /*
   * on stoque le shéma dans une Option pour une meilleure gestion des erreurs.
   * On l'utiliser pour récupére les différentes options souhaitées dans le shchéma load.
@@ -164,12 +165,13 @@ class Generate {
   }
 }
 
-object Generate {
-  final val field = "fields"
-  // final val hdfsUser = "hdfs://192.168.43.16:9000"
-}
+//object Generate {
+//  // final val hdfsUser = "hdfs://192.168.43.16:9000"
+//}
 
-object GenerateRecords {
+object Generate {
+  type GeneratorCombinator = Map[EnumMap.EnumMap, ClassGenerated]
+  final val field = "fields"
 
   /**
     *
@@ -177,21 +179,29 @@ object GenerateRecords {
     * @param p % of good line inside the file
     * @return true or false if function succeed/fail
     */
-  def generateValidRecords(spark: SparkSession, numberOfLine: Int, path:String, schemaToRead: String,
-                           generator: Generate, p:Double): Boolean = {
+  def generateValidRecords(spark: SparkSession, numberOfLine: Int, path:String,
+                           schemaToRead: String, generator: Generate, p:Double, enumToKeep: GeneratorCombinator): Boolean = {
     import EnumMap._
 
+//    val initMap =   Map(VALID -> new ValidLine, WBOOL -> new GenerateWrongBoolean,
+//                        MORECOLUMN -> new GenerateMoreColumns, TYPEFALSE -> new GenerateFalseType)
+//
+//    val newMap = enumToKeep.map(e => initMap.filterNot(f => f._1 == e)).reduce((a1, a2) => a1 ++ a2)
+//
+//    initMap.foreach(element => println("key contains in initMAp" + element._1))
+//    newMap.foreach(element => println("key contains in initMAp" + element._1))
+
     val fieldLine = generator.load(spark, schemaToRead)
-    val check = generator.createRawString(fieldLine, Map(VALID -> new ValidLine,
-      WBOOL -> new GenerateWrongBoolean,
-      MORECOLUMN -> new GenerateMoreColumns,
-      TYPEFALSE -> new GenerateFalseType))(p, numberOfLine, path)
+    val check = generator.createRawString(fieldLine, enumToKeep)(p, numberOfLine, path)
     println(s"isCreateRawStringDone $check")
     check
   }
 
   def main(args: Array[String]): Unit = {
-    require(args.length > 2, "nombre de ligne - path to write file - schema to read ")
+    import EnumMap._
+    require(args.length > 4, "nb de ligne par fichier HDFS - % ligne valide - " +
+                             "type erreur souhaité - /path/to/write/file - /path/to/schema/to/read")
+
     val spark = SparkSession.builder
       .appName("My Spark Application")
       .master("local[*]")
@@ -203,15 +213,22 @@ object GenerateRecords {
     val numberLine  = ParsingArgument.isNumberLineValid(args(0))
     val pValidLine  = ParsingArgument.isPValid(ParsingArgument.isNumberLineValid(args(1)).toDouble)
     val validPath   = ParsingArgument.isPathValid(args(2))
-
+    val listError   = ParsingArgument.isErrorDefined(args(3))
+    val initMap     = Map(VALID -> new ValidLine,
+                          WBOOL -> new GenerateWrongBoolean,
+                          MORECOLUMN -> new GenerateMoreColumns,
+                          TYPEFALSE -> new GenerateFalseType)
+    val newMap      = listError.map(e => initMap.filterNot(f => f._1 == e))
+                               .reduce((a1, a2) => a1 ++ a2)
+    initMap.foreach(element => println("key contains in initMAp" + element._1))
+    newMap.foreach(element => println("key contains in initMAp" + element._1))
     (numberLine, pValidLine, validPath.getOrElse("")) match {
       case (-1, _, _) => println(s" numberLine is invalid $numberLine")
       case (_, _, "") => println(s" path is not valid $validPath")
       case (lines, p, path) =>
-        for (i <- 3 until args.length)
-        ParsingArgument.isDirectory(args(i), generateValidRecords)(spark, lines, path, generator, p)
+        for (i <- 4 until args.length)
+          ParsingArgument.isDirectory(args(i), generateValidRecords)(spark, lines, path, generator, p, newMap)
     }
     spark.stop
   }
 }
-
